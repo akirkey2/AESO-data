@@ -25,11 +25,15 @@ mpl.rcParams['lines.markersize'] = 5
 
 #https://edmontonsun.com/opinion/columnists/gunter-so-called-green-energy-cant-meet-demands-of-today-or-the-foreseeable-future
 #%% Dataframe setup
-df = pd.read_csv('CSD Generation (Hourly) - 2024-01.csv')
+windows_file_path = 'C:\\Users\\Aaron Kirkey\\Documents\\GitHub\\AESO-data\\CSD Generation (Hourly) - 2024-01.csv'
+ubuntu_file_path = ''
+df = pd.read_csv(windows_file_path)
 #%%
 print(df['Fuel Type'].unique())
 #%%
 dftw  = df.loc[(df['Date (MST)'].str.contains('2024-01'))]
+dftotal = dftw.groupby(['Date (MST)']).sum()
+dftotal.index = pd.to_datetime(dftotal.index)
 #%%
 for i in df['Fuel Type'].unique():
     print(i)
@@ -37,5 +41,8 @@ for i in df['Fuel Type'].unique():
     df_temp = df_temp.groupby(['Date (MST)'])[['Date (MST)','Volume']].sum()
     df_temp['Time'] = df_temp.index.str.slice(11,16)
     df_temp.index = pd.to_datetime(df_temp.index)
-    plt.plot(df_temp.index,df_temp['Volume'])
-    plt.title('Hourly Generation on AESO on 2024-01-01')
+    plt.plot(df_temp.index,df_temp['Volume'],label = i)
+plt.plot(dftotal.index,dftotal['Volume'],label = 'Total', color = 'black')
+plt.title('Hourly Generation on AESO Jan 2024')
+plt.legend(loc = 1)
+plt.show()
