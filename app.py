@@ -1,8 +1,9 @@
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Mon Feb 12 09:39:12 2024
+Created on Wed May 15 13:38:59 2024
 
-@author: Aaron Kirkey
+@author: aaronkirkey
 """
 
 #%% Environment setup
@@ -20,20 +21,21 @@ import os
 from sklearn import preprocessing
 import plotly.io as pio
 import plotly.express as px
-from dash import Dash, html
+from dash import Dash, html, dash_table, dcc
+import dash
 pio.renderers.default='browser'
 mpl.rcParams.update(mpl.rcParamsDefault)
 plt.rc('axes', axisbelow=True)
 mpl.interactive(True)
 mpl.rcParams['lines.markersize'] = 5
 
-#https://edmontonsun.com/opinion/columnists/gunter-so-called-green-energy-cant-meet-demands-of-today-or-the-foreseeable-future
 #%% Dataframe setup
 #file_path = 'C:\\Users\\Aaron Kirkey\\Documents\\GitHub\\AESO-data\\CSD Generation (Hourly) - 2024-01.csv'
 file_path = '/home/aaronkirkey/GitRepositories/AESO-data/CSD Generation (Hourly) - 2024-01.csv'
 df = pd.read_csv(file_path)
 #%%
-dftw  = df.loc[(df['Date (MST)'].str.contains('2024-01-01'))]
+substr = '2024-01-0'
+dftw  = df.loc[(df['Date (MST)'].str.contains(substr))]
 dftotal = dftw.groupby(['Date (MST)']).sum()
 dftotal.index = pd.to_datetime(dftotal.index)
 #%%
@@ -56,5 +58,18 @@ plt.show()
 
 #%%
 
-fig = px.area(dftw, x="Date (MST)", y="Volume", color="Fuel Type", line_group='Asset Name')
-fig.show()
+
+#%%
+df_temp_2 = df_temp_2.reset_index()
+#%%  Dash stuff
+app = Dash()
+app.title = 'AESO Energy Dash'
+app.layout = [html.Div(children=f'AESO Generation Data on: {substr}'),
+              dash_table.DataTable(data=df_temp_2.to_dict('records'), page_size=25),
+              dcc.Graph(figure=px.area(dftw, x="Date (MST)", y="Volume", color="Fuel Type", line_group='Asset Name'),
+                        style={'width': '180vh', 'height': '90vh'}),
+              dcc.Graph(figure=)
+              ]
+
+if __name__ == '__main__':
+    app.run(debug=True)
