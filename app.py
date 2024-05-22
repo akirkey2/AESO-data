@@ -54,21 +54,24 @@ plt.plot(dftotal.index,dftotal['Volume'],label = 'Total', color = 'black')
 plt.xticks(rotation = 45)
 plt.title('Hourly Generation on AESO Jan 2024')
 plt.legend(loc = 1)
-plt.show()
-
-#%%
-
-
-#%%
-df_temp_2 = df_temp_2.reset_index()
+# plt.show()
+df1 = df_temp_2
+df1['T2'] = dftotal['Volume']
+df1 = df1.reset_index()
+df1 = df1.round(decimals = 0)
+df1['TOTAL'] = df1[['OTHER', 'WIND', 'GAS', 'HYDRO', 'SOLAR',
+       'ENERGY STORAGE', 'COAL', 'DUAL FUEL']].sum(axis=1)
+#%% Make the columns that represent the percent contribution to total!!! 
+df1
 #%%  Dash stuff
 app = Dash()
 app.title = 'AESO Energy Dash'
 app.layout = [html.Div(children=f'AESO Generation Data on: {substr}'),
-              dash_table.DataTable(data=df_temp_2.to_dict('records'), page_size=25),
+              dash_table.DataTable(data=df1.iloc[:,0:11].to_dict('records'), page_size=25,css=[{'selector': 'table', 'rule': 'table-layout: fixed'}],),
+              dash_table.DataTable(data=df1..iloc[:,11:]to_dict('records'), page_size=25,css=[{'selector': 'table', 'rule': 'table-layout: fixed'}],),
               dcc.Graph(figure=px.area(dftw, x="Date (MST)", y="Volume", color="Fuel Type", line_group='Asset Name'),
-                        style={'width': '180vh', 'height': '90vh'}),
-              dcc.Graph(figure=)
+                        style={'width': '180vh', 'height': '90vh'})
+              # dcc.Graph(figure=)
               ]
 
 if __name__ == '__main__':
