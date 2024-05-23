@@ -62,15 +62,30 @@ df1 = df1.round(decimals = 0)
 df1['TOTAL'] = df1[['OTHER', 'WIND', 'GAS', 'HYDRO', 'SOLAR',
        'ENERGY STORAGE', 'COAL', 'DUAL FUEL']].sum(axis=1)
 #%% Make the columns that represent the percent contribution to total!!! 
-df1
+df1p = pd.DataFrame()
+df1p['Date (MST)'] = df1['Date (MST)']
+for i in df1.columns[1:9]:
+    df1p[f'{i}'] = (df1[f'{i}'] / df1['TOTAL'])*100
+df1p['TOTAL'] = df1p[['OTHER', 'WIND', 'GAS', 'HYDRO', 'SOLAR',
+       'ENERGY STORAGE', 'COAL', 'DUAL FUEL']].sum(axis=1)
+df1p['RENEWABLE'] = df1p[['WIND','HYDRO','SOLAR','ENERGY STORAGE']].sum(axis=1)
+df1p['FOSSIL FUEL'] = df1p[['COAL','GAS','DUAL FUEL']].sum(axis=1)
+df1p = df1p.round(decimals = 2)
+
+#%%
+df1pm = pd.melt(df1p,id_vars = ['Date (MST)'], value_vars = ['RENEWABLE', 'FOSSIL FUEL'])
+df1pm = df1pm.rename(columns={'variable':'Fuel Type','value':'Percent'})
 #%%  Dash stuff
 app = Dash()
 app.title = 'AESO Energy Dash'
-app.layout = [html.Div(children=f'AESO Generation Data on: {substr}'),
+app.layout = [html.Div(html.H1('Heading', style={'backgroundColor':'blue'})),
+                       html.Div(children=f'AESO Generation Data on: {substr}'),
               dash_table.DataTable(data=df1.iloc[:,0:11].to_dict('records'), page_size=25,css=[{'selector': 'table', 'rule': 'table-layout: fixed'}],),
-              dash_table.DataTable(data=df1..iloc[:,11:]to_dict('records'), page_size=25,css=[{'selector': 'table', 'rule': 'table-layout: fixed'}],),
+              html.Div(children=f'% Contribution to total grid supply on: {substr}'),
+              dash_table.DataTable(data=df1p.to_dict('records'), page_size=25,css=[{'selector': 'table', 'rule': 'table-layout: fixed'}],),
               dcc.Graph(figure=px.area(dftw, x="Date (MST)", y="Volume", color="Fuel Type", line_group='Asset Name'),
-                        style={'width': '180vh', 'height': '90vh'})
+                        style={'width': '180vh', 'height': '90vh'}),
+              dcc.Graph(figure=px.line(df1pm,x='Date (MST)',y='Percent',color='Fuel Type'))
               # dcc.Graph(figure=)
               ]
 
