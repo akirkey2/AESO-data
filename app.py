@@ -23,6 +23,7 @@ import plotly.io as pio
 import plotly.express as px
 from dash import Dash, html, dash_table, dcc
 import dash
+import dash_bootstrap_components as dbc
 pio.renderers.default='browser'
 mpl.rcParams.update(mpl.rcParamsDefault)
 plt.rc('axes', axisbelow=True)
@@ -30,14 +31,13 @@ mpl.interactive(True)
 mpl.rcParams['lines.markersize'] = 5
 
 #%% Dataframe setup
-#file_path = 'C:\\Users\\Aaron Kirkey\\Documents\\GitHub\\AESO-data\\CSD Generation (Hourly) - 2024-01.csv'
-file_path = '/home/aaronkirkey/GitRepositories/AESO-data/CSD Generation (Hourly) - 2024-01.csv'
+file_path = 'C:\\Users\\Aaron Kirkey\\Documents\\GitHub\\AESO-data\\CSD Generation (Hourly) - 2024-01.csv'
+# file_path = '/home/aaronkirkey/Documents/AESO-data/CSD Generation (Hourly) - 2024-01.csv'
 df = pd.read_csv(file_path)
 #%%
 substr = '2024-01-0'
 dftw  = df.loc[(df['Date (MST)'].str.contains(substr))]
-dftotal = dftw.groupby(['Date (MST)']).sum()
-dftotal.index = pd.to_datetime(dftotal.index)
+
 #%%
 lst = []
 df_temp_2 = pd.DataFrame()
@@ -50,13 +50,8 @@ for i in df['Fuel Type'].unique():
     df_temp_2[i] = df_temp["Volume"]
     df_temp.index = pd.to_datetime(df_temp.index)
     plt.plot(df_temp.index,df_temp['Volume'],label = i)
-plt.plot(dftotal.index,dftotal['Volume'],label = 'Total', color = 'black')
-plt.xticks(rotation = 45)
-plt.title('Hourly Generation on AESO Jan 2024')
-plt.legend(loc = 1)
-# plt.show()
+
 df1 = df_temp_2
-df1['T2'] = dftotal['Volume']
 df1 = df1.reset_index()
 df1 = df1.round(decimals = 0)
 df1['TOTAL'] = df1[['OTHER', 'WIND', 'GAS', 'HYDRO', 'SOLAR',
@@ -76,18 +71,15 @@ df1p = df1p.round(decimals = 2)
 df1pm = pd.melt(df1p,id_vars = ['Date (MST)'], value_vars = ['RENEWABLE', 'FOSSIL FUEL'])
 df1pm = df1pm.rename(columns={'variable':'Fuel Type','value':'Percent'})
 #%%  Dash stuff
-app = Dash()
+app = Dash(external_stylesheets=[dbc.themes.SANDSTONE])
 app.title = 'AESO Energy Dash'
-app.layout = [html.Div(html.H1('Heading', style={'backgroundColor':'blue'})),
-                       html.Div(children=f'AESO Generation Data on: {substr}'),
+app.layout = html.Div([html.Div(children=f'AESO Generation Data on: {substr}'),
               dash_table.DataTable(data=df1.iloc[:,0:11].to_dict('records'), page_size=25,css=[{'selector': 'table', 'rule': 'table-layout: fixed'}],),
               html.Div(children=f'% Contribution to total grid supply on: {substr}'),
               dash_table.DataTable(data=df1p.to_dict('records'), page_size=25,css=[{'selector': 'table', 'rule': 'table-layout: fixed'}],),
-              dcc.Graph(figure=px.area(dftw, x="Date (MST)", y="Volume", color="Fuel Type", line_group='Asset Name'),
-                        style={'width': '180vh', 'height': '90vh'}),
+              dcc.Graph(figure=px.area(dftw, x="Date (MST)", y="Volume", color="Fuel Type", line_group='Asset Name'),style={'width': '180vh', 'height': '90vh'}),
               dcc.Graph(figure=px.line(df1pm,x='Date (MST)',y='Percent',color='Fuel Type'))
-              # dcc.Graph(figure=)
-              ]
+              ])
 
 if __name__ == '__main__':
     app.run(debug=True)
