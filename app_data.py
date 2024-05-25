@@ -35,7 +35,7 @@ file_path = 'C:\\Users\\Aaron Kirkey\\Documents\\GitHub\\AESO-data\\CSD Generati
 df = pd.read_csv(file_path)
 #%%
 date_range = '2024-01-0' #This will eventaully be a callback to a calendar on the dash
-def df_date_restrict(date_range):
+def df_date_restrict():
     df_date_range = df.loc[(df['Date (MST)'].str.contains(date_range))]
     # dftotal = df_date_range.groupby(['Date (MST)']).sum()
     # dftotal.index = pd.to_datetime(dftotal.index)
