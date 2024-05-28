@@ -25,24 +25,42 @@ from dash import Dash, html, dash_table, dcc
 import dash
 import dash_bootstrap_components as dbc
 import app_data
-S
+from datetime import date
 pio.renderers.default='browser'
-mpl.rcParams.update(mpl.rcParamsDefault)
-plt.rc('axes', axisbelow=True)
-mpl.interactive(True)
-mpl.rcParams['lines.markersize'] = 5
+
 
 
 #%%  Dash stuff
 app = Dash(external_stylesheets=[dbc.themes.SANDSTONE])
 app.title = 'AESO Energy Dash'
-app.layout = html.Div([html.Div(children=f'AESO Generation Data on: {app_data.date_range}'),
-              # dash_table.DataTable(data=df1.iloc[:,0:11].to_dict('records'), page_size=25,css=[{'selector': 'table', 'rule': 'table-layout: fixed'}],),
-              # html.Div(children=f'% Contribution to total grid supply on: {substr}'),
-              # dash_table.DataTable(data=df1p.to_dict('records'), page_size=25,css=[{'selector': 'table', 'rule': 'table-layout: fixed'}],),
-              dcc.Graph(figure=px.area(app_data.df_date_restrict(), x="Date (MST)", y="Volume", color="Fuel Type", line_group='Asset Name'),style={'width': '180vh', 'height': '90vh'}),
-              #dcc.Graph(figure=px.line(df1pm,x='Date (MST)',y='Percent',color='Fuel Type'))
+app.layout = html.Div(
+    [html.Div(children=f'AESO Generation Data on: {app_data.date_range}'),
+    dash_table.DataTable(data=app_data.df_transform().to_dict('records'), page_size=25,css=[{'selector': 'table', 'rule': 'table-layout: fixed'}],),
+    html.Div(children=f'% Contribution to total grid supply on: {app_data.date_range}'),
+    dash_table.DataTable(data=app_data.df_percent().to_dict('records'), page_size=25,css=[{'selector': 'table', 'rule': 'table-layout: fixed'}],),
+    dcc.Graph(figure=px.area(app_data.df_date_restrict(), x="Date (MST)", y="Volume", color="Fuel Type", line_group='Asset Name'),style={'width': '180vh', 'height': '90vh'}),
+    dcc.Graph(figure=px.line(app_data.df_percent(),x='Date (MST)',y=['RENEWABLE','FOSSIL FUEL']))
               ])
+"""
+[dcc.DatePickerSingle(
+        id='my-date-picker-single',
+        min_date_allowed=date(2024, 1, 1),
+        max_date_allowed=date(2024, 1, 31),
+        initial_visible_month=date(2024, 1, 1),
+        date=date(2024, 1, 1)),
+    html.Div(id='output-container-date-picker-single')],
 
-if __name__ == '__main__':S
+@callback(
+    Output('output-container-date-picker-single', 'children'),
+    Input('my-date-picker-single', 'date'))
+def update_output(date_value):
+    string_prefix = 'You have selected: '
+    if date_value is not None:
+        date_object = date.fromisoformat(date_value)
+        date_string = date_object.strftime('%B %d, %Y')
+        return string_prefix + date_string"""
+
+
+if __name__ == '__main__':
     app.run(debug=True)
+    
