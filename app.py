@@ -33,8 +33,9 @@ pio.renderers.default='browser'
 #%%  Dash stuff
 app = Dash(external_stylesheets=[dbc.themes.SANDSTONE])
 app.title = 'AESO Energy Dash'
-app.layout = html.Div(
-    [html.Div(children=f'AESO Generation Data on: {app_data.date_range}'),
+app.layout = html.Div([
+    html.H1(children='AESO Energy Dash'),
+    html.Div(children=f'AESO Generation Data from: {app_data.date_range}'),
     dash_table.DataTable(data=app_data.df_transform().to_dict('records'), page_size=25,css=[{'selector': 'table', 'rule': 'table-layout: fixed'}],),
     html.Div(children=f'% Contribution to total grid supply on: {app_data.date_range}'),
     dash_table.DataTable(data=app_data.df_percent().to_dict('records'), page_size=25,css=[{'selector': 'table', 'rule': 'table-layout: fixed'}],),
