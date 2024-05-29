@@ -21,7 +21,7 @@ import os
 from sklearn import preprocessing
 import plotly.io as pio
 import plotly.express as px
-from dash import Dash, html, dash_table, dcc
+from dash import Dash, html, dash_table, dcc, callback, Input, Output
 import dash
 pio.renderers.default='browser'
 mpl.rcParams.update(mpl.rcParamsDefault)
@@ -34,10 +34,10 @@ mpl.rcParams['lines.markersize'] = 5
 file_path = 'CSD Generation (Hourly) - 2024-01.csv'
 df = pd.read_csv(file_path)
 #%%
-date_range = '2024-01-0' #This will eventaully be a callback to a calendar on the dash
-def df_date_restrict():
+#This will eventaully be a callback to a calendar on the dash
+def df_date_restrict(date):
     
-    df_date_range = df.loc[(df['Date (MST)'].str.contains(date_range))]
+    df_date_range = df.loc[(df['Date (MST)'].str.contains(date))]
     # dftotal = df_date_range.groupby(['Date (MST)']).sum()
     # dftotal.index = pd.to_datetime(dftotal.index)
     return df_date_range #dftotal, 
