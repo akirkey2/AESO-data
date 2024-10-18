@@ -24,7 +24,7 @@ import plotly.express as px
 from dash import Dash, html, dash_table, dcc, callback, Input, Output
 import dash
 import dash_bootstrap_components as dbc
-import app_data_old
+import app_data_new
 import datetime as dt
 from datetime import date
 from datetime import datetime
@@ -37,9 +37,18 @@ pio.renderers.default='browser'
 app = Dash(external_stylesheets=[dbc.themes.SANDSTONE])
 app.title = 'AESO Energy Dash'
 app.layout = html.Div([
-    html.Div([html.H1(children='AESO Energy Dash',style={'textAlign': 'center'}),
+    html.Div([html.H1(children='AESO Energy Dash',style={'textAlign': 'center', 'fontSize':48}),
     html.Br(),
-    html.Div(children='Show AESO Generation Data from: ',style={'fontSize': 22}),
+    html.Div(children=
+             """*Disclaimer: This web-dash and contents are in no way 
+             affiliated with the AESO and serves only as a personal project to 
+             improve my data science and data viz skillset with respect to grid
+             data. For questions, comments or improvement ideas, please contact
+             me at: akirkey2@gmail.com with the subject line 'AESO dash project'.
+             Thank you for your interest!"""),
+    html.Br(),
+    html.Br(),
+    html.Div(children='Show AESO Generation Data from: ',style={'fontSize': 20}),
     dcc.DatePickerSingle(  # This is a drop-down calendar that updates the elements on the page
             id='date-picker-single',
             min_date_allowed=date(2024, 1, 1),
@@ -49,7 +58,7 @@ app.layout = html.Div([
             display_format='Y-M-D'),
     html.Br(),
     html.Br(),
-    html.Div(children = 'Date chosen: ',style={'fontSize': 22}), # Visual feedback on page displaying date
+    html.Div(children = 'Date chosen: ',style={'fontSize': 20}), # Visual feedback on page displaying date
     dcc.Markdown(id='date_display',children = '')]),
     html.Br(),
     
@@ -117,10 +126,10 @@ app.layout = html.Div([
 #Calls functions with updated date to make dash reactive to selected date
 def update_date(user_selected):    
     print(user_selected) #The function argument comes from the component property of the Input
-    summary_data = app_data_old.df_summary(user_selected).to_dict('records')
-    percent_data = app_data_old.df_percent(user_selected).to_dict('records')
-    asset_gen_fig = px.area(app_data_old.df_date_restrict(user_selected), x='Date (MST)', y="Volume", color="Fuel Type")
-    clean_ff_fig = px.line(app_data_old.df_percent(user_selected),x='Date (MST)',y=['RENEWABLE','FOSSIL FUEL'])
+    summary_data = app_data_new.df_summary(user_selected).to_dict('records')
+    percent_data = app_data_new.df_percent(user_selected).to_dict('records')
+    asset_gen_fig = px.area(app_data_new.df_date_restrict(user_selected), x='Date (MST)', y="Volume", color="Fuel Type")
+    clean_ff_fig = px.line(app_data_new.df_percent(user_selected),x='Date (MST)',y=['RENEWABLE','FOSSIL FUEL'])
     return user_selected, summary_data, percent_data, asset_gen_fig, clean_ff_fig # The returned object is assigned to the component property of the Output
 
 if __name__ == '__main__':
